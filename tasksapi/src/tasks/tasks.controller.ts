@@ -1,27 +1,41 @@
-import { Controller, Get, Post, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { TasksService } from './tasks.service';
+import { CreateTaskDto } from 'src/dto/create-task.dto';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) { }
   @Get()
   findAll() {
-    return 'This action returns all tasks';
+    return this.tasksService.findAll();
   }
+
   @Get(':id')
-  findOne() {
-    return 'This action returns one task';
+  async findOne(@Param('id') id: string) {
+    const task = await this.tasksService.findOne(id);
+    if (!task) {
+      throw new Error('Task not found');
+    }
+    return task;
   }
+
   @Post()
-  create() {
-    return 'This action adds a new task';
+  async create(@Body() body: CreateTaskDto) {
+    try {
+      return await this.tasksService.create(body);
+    } catch (error) {
+      console.error('Error creating task:', error);
+      throw error;
+    }
   }
+
   @Put(':id')
-  update() {
-    return 'This action updates a task';
+  update(@Param('id') id: string, @Body() body: CreateTaskDto) {
+    return this.tasksService.update(id, body);
   }
+
   @Delete(':id')
-  delete() {
-    return 'This action deletes a task';
+  delete(@Param('id') id: string) {
+    return this.tasksService.delete(id);
   }
 }
